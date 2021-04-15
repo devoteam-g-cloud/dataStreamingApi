@@ -25,7 +25,9 @@ type FakeStruct struct {
 }
 
 func GenerateFakeJson() []byte {
+
 	var fakeStruct FakeStruct
+	//populates empty struct
 	gofakeit.Struct(&fakeStruct)
 	b, err := json.Marshal(fakeStruct)
 	if err != nil {
@@ -35,15 +37,11 @@ func GenerateFakeJson() []byte {
 	return b
 }
 
-func FakeDataGenerator(channel chan []byte, stopChannel chan bool) {
+func FakeDataGenerator(channel chan []byte) {
+	// fills channel until it reaches capacity
 	for {
+		//time.Sleep(time.Second)
 		channel <- GenerateFakeJson()
-		select {
-		case <-stopChannel:
-			return
-		default:
-		}
-
 	}
 
 }

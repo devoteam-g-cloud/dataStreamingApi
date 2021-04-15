@@ -7,23 +7,24 @@ import (
 	"main/fakeDataGenerator"
 )
 
+//Make a global channel
+var c = make(chan []byte, 100000)
+
 func dataStreaming(w http.ResponseWriter, req *http.Request) {
-	c := make(chan []byte, 10000)
-	stopChannel := make(chan bool)
-	defer close(c)
+	// prints header values
 	for name, values := range req.Header {
 		// Loop over all values for the name.
 		for _, value := range values {
 			fmt.Println(name, value)
 		}
 	}
+	// initiate a counter
 	i := 0
 
-	go fakeDataGenerator.FakeDataGenerator(c, stopChannel)
-
+	//infinite data stream
 	for {
+		//stream in the response body
 		fmt.Fprintf(w, string(<-c)+"\n")
-
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
 		}
@@ -31,11 +32,10 @@ func dataStreaming(w http.ResponseWriter, req *http.Request) {
 		if i%100000 == 0 {
 			fmt.Println(i)
 		}
+		//Checks if the client closes connection or not (not supported by cloud run yet)
 		select {
 		case <-req.Context().Done():
-			stopChannel <- true
 			req.Body.Close()
-
 			return
 
 		default:
@@ -44,6 +44,9 @@ func dataStreaming(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	//initiate fakeDataGeneration in a separate goroutine
+	go fakeDataGenerator.FakeDataGenerator(c)
+	//Handles get requests
 	http.HandleFunc("/dataStreamingEndpoint", dataStreaming)
 
 	http.ListenAndServe(":8080", nil)
