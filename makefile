@@ -1,4 +1,4 @@
-build-container-repo:
+build-gcr:
 	gcloud builds submit --tag gcr.io/sandbox-fmalbranque/api-streaming-data
 
 deploy-cloud-run:
@@ -14,9 +14,17 @@ deploy-cloud-run:
 	--max-instances=1 \
 
 build-local:
-	docker run --rm -e PORT=8080 -p 8080:8080 gcr.io/sandbox-fmalbranque/api-streaming-data 
+	docker image build . -t data-streaming
+
+run-local:
+	docker run --rm -e PORT=8080 -p 8080:8080 data-streaming
+
+
+
+build-run-local:
+	make build-local && make run-local
 	#make sure docker deamon is working
 
 build-and-deploy:
-	make build && make deploy-cloud-run
+	make build-gcr && make deploy-cloud-run
 

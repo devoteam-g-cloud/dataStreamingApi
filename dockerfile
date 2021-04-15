@@ -7,16 +7,14 @@ WORKDIR /build
 COPY main.go .
 COPY fakeDataGenerator/ ./fakeDataGenerator/
 
-
+# generates module
 RUN go mod init main
 RUN go mod tidy
-
-
 
 # Build the application
 RUN CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build
 
-# Build a small image
+# Build a small image using distroless from google
 FROM gcr.io/distroless/base-debian10
 
 COPY --from=builder /build/main .

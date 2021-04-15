@@ -9,8 +9,8 @@ import (
 )
 
 type FakeStruct struct {
-	Name          string    `fake:"{name}"`     // Any available function all lowercase
-	Sentence      string    `fake:"{sentence}"` // Can call with parameters
+	Name          string    `fake:"{name}"`             // Any available function all lowercase
+	Sentence      string    `fake:"{sentence:100,300}"` // Can call with parameters
 	RandStr       string    `fake:"{randomstring}"`
 	PhoneNumber   string    `fake:"{phone}"` // Comma separated for multiple values
 	Email         string    `fake:"{email}"` // Generate string from regex
@@ -20,13 +20,17 @@ type FakeStruct struct {
 	CarModel      string    `fake:"{carmodel}"`
 	Created       time.Time // Can take in a fake tag as well as a format tag
 	CreatedFormat time.Time `fake:"{year}-{month}-{day}" format:"2006-01-02"`
-	FavoriteFood  string    `fake:"{dinner}"`
-	FavoriteColor string    `fake:"{color}"`
+	Updated       time.Time
+	FavoriteFood  string `fake:"{dinner}"`
+	FavoriteColor string `fake:"{color}"`
 }
 
 func GenerateFakeJson() []byte {
+
 	var fakeStruct FakeStruct
+	//populates empty struct
 	gofakeit.Struct(&fakeStruct)
+	fakeStruct.Updated = time.Now()
 	b, err := json.Marshal(fakeStruct)
 	if err != nil {
 		fmt.Println(err)
@@ -35,15 +39,11 @@ func GenerateFakeJson() []byte {
 	return b
 }
 
-func FakeDataGenerator(channel chan []byte, stopChannel chan bool) {
+func FakeDataGenerator(channel chan []byte) {
+	// fills channel until it reaches capacity
 	for {
+		//time.Sleep(time.Second)
 		channel <- GenerateFakeJson()
-		select {
-		case <-stopChannel:
-			return
-		default:
-		}
-
 	}
 
 }
