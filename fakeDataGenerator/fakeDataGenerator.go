@@ -18,9 +18,9 @@ type FakeStruct struct {
 	Latitude      float64   `fake:"{latitude}"`
 	Zip           string    `fake:"{zip}"`
 	CarModel      string    `fake:"{carmodel}"`
-	Created       time.Time // Can take in a fake tag as well as a format tag
-	CreatedFormat time.Time `fake:"{year}-{month}-{day}" format:"2006-01-02"`
+	Created       time.Time `fake:"{date}"`
 	Updated       time.Time
+	MessageId     string `fake:"{uuid}"`
 	FavoriteFood  string `fake:"{dinner}"`
 	FavoriteColor string `fake:"{color}"`
 }
