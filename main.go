@@ -1,25 +1,20 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"main/fakeDataGenerator"
 )
 
 //Make a global channel
-var c = make(chan []byte, 100000)
+var c chan []byte
+var handlerThrottling *int
 
 func dataStreaming(w http.ResponseWriter, req *http.Request) {
-	// prints header values
-	for name, values := range req.Header {
-		// Loop over all values for the name.
-		for _, value := range values {
-			fmt.Println(name, value)
-		}
-	}
-	// initiate a counter
-	i := 0
 
 	//infinite data stream
 	for {
@@ -27,10 +22,6 @@ func dataStreaming(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, string(<-c)+"\n")
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
-		}
-		i++
-		if i%100000 == 0 {
-			fmt.Println(i)
 		}
 		//Checks if the client closes connection or not (not supported by cloud run yet)
 		select {
@@ -40,14 +31,25 @@ func dataStreaming(w http.ResponseWriter, req *http.Request) {
 
 		default:
 		}
+		if *handlerThrottling != 0 {
+			time.Sleep(time.Duration(1 / *handlerThrottling) * time.Second)
+		}
+
 	}
 }
 
 func main() {
+	generatorThrottling := flag.Int("generator-throttling-rate", 0, "json generator throttling (element/second)")
+	handlerThrottling = flag.Int("handler-throttling-rate", 0, "handler throttling (element/second)")
+	channelSize := flag.Int("channel-size", 100000, "channel size (number of messages)")
+	flag.Parse()
+
+	c = make(chan []byte, *channelSize)
+
 	//initiate fakeDataGeneration in a separate goroutine
-	go fakeDataGenerator.FakeDataGenerator(c)
+	go fakeDataGenerator.FakeDataGenerator(c, generatorThrottling)
 	//Handles get requests
 	http.HandleFunc("/dataStreamingEndpoint", dataStreaming)
 
-	http.ListenAndServe(":8080", nil)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

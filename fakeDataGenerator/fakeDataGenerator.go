@@ -9,8 +9,8 @@ import (
 )
 
 type FakeStruct struct {
-	Name          string    `fake:"{name}"`             // Any available function all lowercase
-	Sentence      string    `fake:"{sentence:100,300}"` // Can call with parameters
+	Name          string    `fake:"{name}"`              // Any available function all lowercase
+	Sentence      string    `fake:"{sentence:100,3000}"` // Can call with parameters
 	RandStr       string    `fake:"{randomstring}"`
 	PhoneNumber   string    `fake:"{phone}"` // Comma separated for multiple values
 	Email         string    `fake:"{email}"` // Generate string from regex
@@ -39,11 +39,19 @@ func GenerateFakeJson() []byte {
 	return b
 }
 
-func FakeDataGenerator(channel chan []byte) {
+func FakeDataGenerator(channel chan []byte, generatorFrequency *int) {
 	// fills channel until it reaches capacity
-	for {
-		//time.Sleep(time.Second)
-		channel <- GenerateFakeJson()
+
+	if *generatorFrequency != 0 {
+		for {
+			time.Sleep(time.Duration(1 / *generatorFrequency) * time.Second)
+			channel <- GenerateFakeJson()
+		}
+
+	} else {
+		for {
+			channel <- GenerateFakeJson()
+		}
 	}
 
 }
