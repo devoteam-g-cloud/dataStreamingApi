@@ -49,10 +49,6 @@ func dataStreaming(w http.ResponseWriter, req *http.Request) {
 			}
 
 		}
-		if *handlerThrottling != 0 {
-			time.Sleep(time.Duration(1 / *handlerThrottling) * time.Second)
-		}
-
 	}
 
 }
