@@ -4,14 +4,14 @@ build-gcr:
 deploy-cloud-run:
 	gcloud beta run deploy api-streaming-data \
 	--image=gcr.io/sandbox-fmalbranque/api-streaming-data \
-	--concurrency=1 \
+	--concurrency=5 \
 	--cpu=1 \
 	--memory=128M \
 	--platform=managed \
 	--port=8080 \
 	--timeout=10 \
 	--region=europe-west1 \
-	--max-instances=1 \
+	--max-instances=2 \
 
 build-local:
 	docker image build . -t data-streaming

@@ -8,7 +8,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 )
 
-type FakeStruct struct {
+type FakeElement struct {
 	Name          string    `fake:"{name}"`              // Any available function all lowercase
 	Sentence      string    `fake:"{sentence:100,3000}"` // Can call with parameters
 	RandStr       string    `fake:"{randomstring}"`
@@ -27,11 +27,11 @@ type FakeStruct struct {
 
 func GenerateFakeJson() []byte {
 
-	var fakeStruct FakeStruct
+	var fakeElement FakeElement
 	//populates empty struct
-	gofakeit.Struct(&fakeStruct)
-	fakeStruct.Updated = time.Now()
-	b, err := json.Marshal(fakeStruct)
+	gofakeit.Struct(&fakeElement)
+	fakeElement.Updated = time.Now()
+	b, err := json.Marshal(fakeElement)
 	if err != nil {
 		fmt.Println(err)
 	}
