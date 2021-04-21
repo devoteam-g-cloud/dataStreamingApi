@@ -21,4 +21,4 @@ COPY --from=builder /build/main .
 
 # Command to run
 
-CMD ["/main"]
+CMD ["/main","--generator-throttling-rate=0","--handler-throttling-rate=0","--channel-size=10000","--is-gzip=false"]
